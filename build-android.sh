@@ -1,7 +1,27 @@
 #!/bin/sh
+set -e
 
 # Configuration
-OUTPUT_DIR="../app/libs"
+OUTPUT_DIR="build/android"
+
+# This script builds the Android AAR library
+#
+# Usage:
+#   ./build-android.sh [architectures...]
+#
+# Options:
+#   architectures    Optional. Space-separated list of Android architectures to build for
+#
+# Supported architectures:
+#   arm64-v8a       ARM64 architecture
+#   armeabi-v7a     ARM v7 architecture
+#   x86_64          x86_64 architecture
+#   x86             x86 architecture
+#
+# Examples:
+#   ./build-android.sh                            # Build for all architectures
+#   ./build-android.sh arm64-v8a armeabi-v7a     # Build only for ARM architectures
+#   ./build-android.sh x86_64                     # Build only for x86_64
 
 # Get Go arch for Android ABI
 get_go_arch() {
@@ -44,16 +64,19 @@ build_archs() {
         -ldflags "-buildid=" \
         -trimpath \
         -o "$OUTPUT_DIR/XrayCore.aar" \
-        .
+        -v .
 }
 
 # Ensure output directory exists
 mkdir -p "$OUTPUT_DIR"
 
-# Install and init gomobile
-echo "Setting up gomobile..."
-go install golang.org/x/mobile/cmd/gomobile@latest
-gomobile init
+# Check if gomobile is installed
+if ! command -v gomobile &> /dev/null; then
+    echo "Installing gomobile..."
+    go install golang.org/x/mobile/cmd/gomobile@latest
+    go install golang.org/x/mobile/cmd/gobind@latest
+    gomobile init
+fi
 
 # Build
 if [ $# -eq 0 ]; then
