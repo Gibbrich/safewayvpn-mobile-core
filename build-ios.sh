@@ -50,8 +50,8 @@ fi
 
 echo "Building iOS framework..."
 gomobile bind \
-    -target=ios \
-    -ldflags="$LDFLAGS" \
+    -target ios,iossimulator,macos \
+    -iosversion 15.0 \
     -trimpath \
     -o "$OUTPUT_DIR/XrayCore.xcframework" \
     -v .
